@@ -5,7 +5,9 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import com.javaee.diego.matias.trabalhofinaljava.domain.Company;
+import com.javaee.diego.matias.trabalhofinaljava.domain.CompanySellMessage;
 import com.javaee.diego.matias.trabalhofinaljava.repositories.CompanyRepository;
+import com.javaee.diego.matias.trabalhofinaljava.services.ICompanySellQueue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -30,6 +32,9 @@ public class CompanyController{
   @Autowired
   private CompanyRepository repository;
 
+  @Autowired
+  private ICompanySellQueue companySellQueue;
+
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
   public Iterable<Company> findAll(){
@@ -47,7 +52,7 @@ public class CompanyController{
   public Company findById(@PathVariable Long id) throws ResourceNotFoundException {
     Optional<Company> user = repository.findById(id);
     if(!user.isPresent()){
-      throw new ResourceNotFoundException("Company not found");
+      throw new ResourceNotFoundException("company not found");
     }
     
     return user.get();
@@ -63,12 +68,24 @@ public class CompanyController{
   }
 
   @PutMapping(path = "/{id}")
-  public Company update(@PathVariable Long id, @RequestBody Company user) throws BadHttpRequest {
+  public Company update(@PathVariable Long id,@Valid @RequestBody Company user) throws ResourceNotFoundException {
     if (repository.existsById(id)) {
         user.setId(id);
        return repository.save(user);
     } else {
-        throw new BadHttpRequest();
+        throw new ResourceNotFoundException("company not found");
+    }
+  }
+
+  @PostMapping(path = "/{id}/stocks")
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  public String putToSell(@PathVariable Long id,@Valid @RequestBody CompanySellMessage message) throws ResourceNotFoundException{
+    if (repository.existsById(id)) {
+      message.setCompany_id(id);
+      companySellQueue.sendMessage(message);
+      return "Creating your stocks";
+    } else {
+      throw new ResourceNotFoundException("company not found");
     }
   }
 }

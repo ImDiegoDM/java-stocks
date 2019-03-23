@@ -8,10 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class SellQueueConfig {
-  public static final String QUEUE_MESSAGES = "sell-queue";
-  public static final String EXCHANGE_MESSAGES = "sell-exchange";
-  public static final String QUEUE_DEAD_MESSAGES = "dead-sell-queue";
+public class CompanySellQueueConfig {
+  public static final String QUEUE_MESSAGES = "companysell-queue";
+  public static final String EXCHANGE_MESSAGES = "companysell-exchange";
+  public static final String QUEUE_DEAD_MESSAGES = "dead-companysell-queue";
 
   @Bean
   Queue sellMessagesQueue() {

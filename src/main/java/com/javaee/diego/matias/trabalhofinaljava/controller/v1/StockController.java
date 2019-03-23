@@ -6,6 +6,7 @@ import com.javaee.diego.matias.trabalhofinaljava.domain.Stock;
 import com.javaee.diego.matias.trabalhofinaljava.repositories.StockRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -19,10 +20,15 @@ public class StockController{
   @Autowired
   private StockRepository repository;
 
-
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
   public Iterable<Stock> findAll(){
     return repository.findAll();
+  }
+
+  @GetMapping(path = "/selling")
+  @ResponseStatus(HttpStatus.OK)
+  public Iterable<Stock> findSelingAll(){
+    return repository.findBySelling(true);
   }
 } 

@@ -66,7 +66,7 @@ public class UserController {
   }
 
   @PutMapping(path = "/{id}")
-  public User update(@PathVariable Long id, @RequestBody User user) throws BadHttpRequest {
+  public User update(@PathVariable Long id,@Valid @RequestBody User user) throws BadHttpRequest {
     if (repository.existsById(id)) {
         user.setId(id);
        return repository.save(user);

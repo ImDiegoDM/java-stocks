@@ -7,6 +7,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -21,6 +22,7 @@ public class Stock{
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
+  @NotNull
   @ManyToOne
   @JsonIgnoreProperties("stocks")
   private Company company;
@@ -29,7 +31,10 @@ public class Stock{
   @JsonIgnoreProperties("stocks")
   private User user;
 
+  @NotNull
   private Float value;
+  
+  private Boolean selling;
 
   private Float initialValue;
 
