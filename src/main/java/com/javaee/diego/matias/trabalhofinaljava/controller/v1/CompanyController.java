@@ -22,8 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import javassist.tools.web.BadHttpRequest;
-
 @RestController
 @RequestMapping(CompanyController.BASE_URL)
 public class CompanyController{
@@ -67,7 +65,7 @@ public class CompanyController{
     }
   }
 
-  @PutMapping(path = "/{id}")
+  @PutMapping(path = "/{id}",consumes = "application/json")
   public Company update(@PathVariable Long id,@Valid @RequestBody Company user) throws ResourceNotFoundException {
     if (repository.existsById(id)) {
         user.setId(id);
@@ -77,7 +75,7 @@ public class CompanyController{
     }
   }
 
-  @PostMapping(path = "/{id}/stocks")
+  @PostMapping(path = "/{id}/stocks",consumes = "application/json")
   @ResponseStatus(HttpStatus.ACCEPTED)
   public String putToSell(@PathVariable Long id,@Valid @RequestBody CompanySellMessage message) throws ResourceNotFoundException{
     if (repository.existsById(id)) {

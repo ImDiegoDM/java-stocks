@@ -1,11 +1,18 @@
 package com.javaee.diego.matias.trabalhofinaljava.controller.v1;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.validation.Valid;
 
+import com.javaee.diego.matias.trabalhofinaljava.domain.SellStockMessage;
+import com.javaee.diego.matias.trabalhofinaljava.domain.Stock;
 import com.javaee.diego.matias.trabalhofinaljava.domain.User;
+import com.javaee.diego.matias.trabalhofinaljava.domain.UserBuyStockMessage;
+import com.javaee.diego.matias.trabalhofinaljava.exceptions.StockNotYoursException;
+import com.javaee.diego.matias.trabalhofinaljava.repositories.StockRepository;
 import com.javaee.diego.matias.trabalhofinaljava.repositories.UserRepository;
+import com.javaee.diego.matias.trabalhofinaljava.services.IUserBuyStockQueue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -32,6 +39,12 @@ public class UserController {
 
   @Autowired
   private UserRepository repository;
+
+  @Autowired
+  private StockRepository stockRepository;
+
+  @Autowired
+  private IUserBuyStockQueue queue;
 
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
@@ -65,13 +78,56 @@ public class UserController {
     }
   }
 
-  @PutMapping(path = "/{id}")
-  public User update(@PathVariable Long id,@Valid @RequestBody User user) throws BadHttpRequest {
+  @PutMapping(path = "/{id}",consumes = "application/json")
+  public User update(@PathVariable Long id,@Valid @RequestBody User user) throws ResourceNotFoundException {
     if (repository.existsById(id)) {
         user.setId(id);
        return repository.save(user);
     } else {
-        throw new BadHttpRequest();
+        throw new ResourceNotFoundException("User not found");
     }
+  }
+
+  @PostMapping(path = "/{id}/sell",consumes = "application/json")
+  public Stock sellStock(@PathVariable Long id,@Valid @RequestBody SellStockMessage message) throws ResourceNotFoundException,BadHttpRequest {
+    Optional<User> user = repository.findById(id);
+    Optional<Stock> stock = stockRepository.findById(message.getStock_id());
+    if (user.isPresent() && stock.isPresent()){
+      List<Stock> list = user.get().getStocks();
+      boolean finded=false;
+      Stock s = stock.get();
+
+      for (Stock var : list) {
+        if(var.getId() == s.getId()){
+          finded=true;
+        }  
+      }
+
+      if(!finded){
+        throw new StockNotYoursException();
+      }
+
+      s.setValue(message.getValue());
+      s.setSelling(true);
+      return stockRepository.save(s);
+    }
+
+    throw new ResourceNotFoundException("User not found");
+  }
+
+  @PostMapping(path = "/{id}/buy",consumes = "application/json")
+  @ResponseStatus(HttpStatus.ACCEPTED)
+  public String buyStock(@PathVariable Long id,@Valid @RequestBody UserBuyStockMessage message) throws ResourceNotFoundException  {
+    if (repository.existsById(id)) {
+      if(stockRepository.existsById(message.getStock_id())){
+        message.setUser_id(id);
+        queue.sendMessage(message);
+        return "Buying your stocks";
+      }
+
+      throw new ResourceNotFoundException("Stock not found");
+    }
+
+    throw new ResourceNotFoundException("User not found");
   }
 }

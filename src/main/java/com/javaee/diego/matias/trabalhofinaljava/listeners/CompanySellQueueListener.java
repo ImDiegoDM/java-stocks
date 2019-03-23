@@ -1,7 +1,5 @@
 package com.javaee.diego.matias.trabalhofinaljava.listeners;
 
-import java.time.LocalDateTime;
-
 import com.javaee.diego.matias.trabalhofinaljava.config.CompanySellQueueConfig;
 import com.javaee.diego.matias.trabalhofinaljava.domain.Company;
 import com.javaee.diego.matias.trabalhofinaljava.domain.CompanySellMessage;
@@ -29,7 +27,6 @@ public class CompanySellQueueListener{
   public void processMessage(CompanySellMessage message) {
     for (int i = 0; i < message.getQuantity(); i++) {
       Stock s = new Stock();
-      s.setBuyed_at(LocalDateTime.now());
       Company comp = companyRepository.findById(message.getCompany_id()).get();
       s.setCompany(comp);
       s.setInitialValue(message.getValue());
