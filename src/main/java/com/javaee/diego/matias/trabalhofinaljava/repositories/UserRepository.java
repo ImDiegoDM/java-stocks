@@ -1,7 +1,5 @@
 package com.javaee.diego.matias.trabalhofinaljava.repositories;
 
-import java.util.List;
-
 import com.javaee.diego.matias.trabalhofinaljava.domain.User;
 
 import org.springframework.data.jpa.repository.JpaRepository;

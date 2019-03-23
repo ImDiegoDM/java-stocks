@@ -8,6 +8,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -20,9 +22,11 @@ public class Stock{
   private Long id;
 
   @ManyToOne
+  @JsonIgnoreProperties("stocks")
   private Company company;
 
   @ManyToOne
+  @JsonIgnoreProperties("stocks")
   private User user;
 
   private Float value;

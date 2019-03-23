@@ -1,7 +1,6 @@
 package com.javaee.diego.matias.trabalhofinaljava.domain;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -11,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -28,5 +29,6 @@ public class Company{
   private String name;
 
   @OneToMany(cascade = CascadeType.ALL, mappedBy = "company")
-  private Set<Stock> stocks = new HashSet<>();
+  @JsonIgnoreProperties("company")
+  private List<Stock> stocks;
 }
