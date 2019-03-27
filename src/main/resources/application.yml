@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/db
+    url: jdbc:mysql://db/db
     username: root
     password: admin123
     platform: mysql
@@ -15,8 +15,17 @@ spring:
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
     database: mysql
   rabbitmq: 
-    host: localhost
+    host: rabbitmq
     port: 5672
     username: guest
     password: guest
+  mail:
+    host: smtp.mailtrap.io
+    port: 2525
+    auth: true
+    username: 79e6bb7eaed7d1
+    password: a7790b458fa607
+    starttls:
+      enable: true
+      
   

@@ -1,5 +1,6 @@
 package com.javaee.diego.matias.trabalhofinaljava.controller.v1;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -22,6 +23,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+
+@Api("This is Company Api")
 @RestController
 @RequestMapping(CompanyController.BASE_URL)
 public class CompanyController{
@@ -33,18 +38,21 @@ public class CompanyController{
   @Autowired
   private ICompanySellQueue companySellQueue;
 
+  @ApiOperation(value = "View all companies")
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
-  public Iterable<Company> findAll(){
+  public List<Company> findAll(){
     return repository.findAll();
   }
 
+  @ApiOperation(value = "Create a company")
   @PostMapping(consumes = "application/json")
   @ResponseStatus(HttpStatus.CREATED)
   public Company create(@Valid @RequestBody Company user) {
     return repository.save(user);
   }
 
+  @ApiOperation(value = "Get one company")
   @GetMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.OK)
   public Company findById(@PathVariable Long id) throws ResourceNotFoundException {
@@ -56,6 +64,7 @@ public class CompanyController{
     return user.get();
   }
 
+  @ApiOperation(value = "Delete a company")
   @DeleteMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable Long id){
@@ -65,6 +74,7 @@ public class CompanyController{
     }
   }
 
+  @ApiOperation(value = "Update a company")
   @PutMapping(path = "/{id}",consumes = "application/json")
   public Company update(@PathVariable Long id,@Valid @RequestBody Company user) throws ResourceNotFoundException {
     if (repository.existsById(id)) {
@@ -75,6 +85,7 @@ public class CompanyController{
     }
   }
 
+  @ApiOperation(value = "Create stocks for this company")
   @PostMapping(path = "/{id}/stocks",consumes = "application/json")
   @ResponseStatus(HttpStatus.ACCEPTED)
   public String putToSell(@PathVariable Long id,@Valid @RequestBody CompanySellMessage message) throws ResourceNotFoundException{

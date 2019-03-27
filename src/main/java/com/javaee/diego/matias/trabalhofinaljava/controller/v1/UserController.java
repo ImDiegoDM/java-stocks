@@ -9,6 +9,7 @@ import com.javaee.diego.matias.trabalhofinaljava.domain.SellStockMessage;
 import com.javaee.diego.matias.trabalhofinaljava.domain.Stock;
 import com.javaee.diego.matias.trabalhofinaljava.domain.User;
 import com.javaee.diego.matias.trabalhofinaljava.domain.UserBuyStockMessage;
+import com.javaee.diego.matias.trabalhofinaljava.exceptions.StockNotForSaleException;
 import com.javaee.diego.matias.trabalhofinaljava.exceptions.StockNotYoursException;
 import com.javaee.diego.matias.trabalhofinaljava.repositories.StockRepository;
 import com.javaee.diego.matias.trabalhofinaljava.repositories.UserRepository;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import javassist.tools.web.BadHttpRequest;
 
 @Api("This is User Api")
@@ -46,18 +48,21 @@ public class UserController {
   @Autowired
   private IUserBuyStockQueue queue;
 
+  @ApiOperation(value = "View list of user",notes = "this endpoint will create a user")
   @GetMapping
   @ResponseStatus(HttpStatus.OK)
-  public Iterable<User> findAll(){
+  public List<User> findAll(){
     return repository.findAll();
   }
 
+  @ApiOperation(value = "Create user")
   @PostMapping(consumes = "application/json")
   @ResponseStatus(HttpStatus.CREATED)
   public User create(@Valid @RequestBody User user) {
     return repository.save(user);
   }
 
+  @ApiOperation(value = "Finding user by id")
   @GetMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.OK)
   public User findById(@PathVariable Long id) throws ResourceNotFoundException {
@@ -69,6 +74,7 @@ public class UserController {
     return user.get();
   }
 
+  @ApiOperation(value = "Delete user")
   @DeleteMapping(path = "/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void delete(@PathVariable Long id){
@@ -78,6 +84,7 @@ public class UserController {
     }
   }
 
+  @ApiOperation(value = "Update user")
   @PutMapping(path = "/{id}",consumes = "application/json")
   public User update(@PathVariable Long id,@Valid @RequestBody User user) throws ResourceNotFoundException {
     if (repository.existsById(id)) {
@@ -88,6 +95,7 @@ public class UserController {
     }
   }
 
+  @ApiOperation(value = "Sell user stock")
   @PostMapping(path = "/{id}/sell",consumes = "application/json")
   public Stock sellStock(@PathVariable Long id,@Valid @RequestBody SellStockMessage message) throws ResourceNotFoundException,BadHttpRequest {
     Optional<User> user = repository.findById(id);
@@ -115,14 +123,21 @@ public class UserController {
     throw new ResourceNotFoundException("User not found");
   }
 
+  @ApiOperation(value = "Buy stock")
   @PostMapping(path = "/{id}/buy",consumes = "application/json")
   @ResponseStatus(HttpStatus.ACCEPTED)
   public String buyStock(@PathVariable Long id,@Valid @RequestBody UserBuyStockMessage message) throws ResourceNotFoundException  {
     if (repository.existsById(id)) {
-      if(stockRepository.existsById(message.getStock_id())){
-        message.setUser_id(id);
-        queue.sendMessage(message);
-        return "Buying your stocks";
+      Optional<Stock> s = stockRepository.findById(message.getStock_id());
+      if(s.isPresent()){
+        if(s.get().getSelling() == true){
+          message.setUser_id(id);
+          queue.sendMessage(message);
+  
+          return "Buying your stocks";
+        }
+
+        throw new StockNotForSaleException();
       }
 
       throw new ResourceNotFoundException("Stock not found");
